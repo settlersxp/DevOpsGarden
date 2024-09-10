@@ -1,0 +1,37 @@
+# this is the Kubernetes deployment file for the oak service. The oak service is a container that runs a specific image of the tree application.
+# The image is built on top of the Docker/Dockerfile file and is tagged Oak. See the README.md file for more information.
+# In order to keep the services separated each will have its own namespace. The oak service will be in the oak namespace.
+
+kind: ReplicationController
+apiVersion: apps/v1
+metadata:
+  name: oak
+  namespace: oak-ns
+  labels:
+    app: oak-label
+spec:
+  replicas: 20
+  selector:
+      matchLabels:
+      app: oak
+  template:
+      metadata:
+      labels:
+          app: oak
+      spec:
+        type: ExternalName
+        externalName: oak.oak-ns.svc.cluster.local
+      containers:
+      - name: oak
+        image: oak:latest
+        env:
+        - name: AGE
+          value: "1"
+        volumeMounts:
+        - mountPath: /app/logs
+          name: oak-logs
+      volumes:
+      - name: oak-logs
+        hostPath:
+          path: /volumes/oak/logs/
+          type: Directory

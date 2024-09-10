@@ -1,0 +1,29 @@
+# the gardner pod can access the oak, pine and maple pods but the oak, pine and maple pods can't access each other.
+
+kind: ReplicationController
+apiVersion: apps/v1
+metadata:
+  name: gardner
+  namespace: gardner-ns
+  labels:
+    app: gardner-label
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+        app: gardner
+    template:
+        metadata:
+        labels:
+            app: gardner
+        containers:
+        - name: gardner
+          image: nginx:latest
+          volumeMounts:
+          - mountPath: /app/logs
+            name: gardner-logs
+        volumes:
+          - name: gardner-logs
+            hostPath:
+              - path: /volumes/gardner/logs/
+                type: Directory

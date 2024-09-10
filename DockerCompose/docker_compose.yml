@@ -1,0 +1,61 @@
+# The service is the top layer of a Docker Compose file. The service is a container that runs a specific image.
+# the images are built on top of the Docker/Dockerfile file and are tagged Oak, Pine and Maple. See the README.md file for more information.
+
+version: "3.5"
+oak:
+    image: oak:latest
+    container_name: oak
+    env_file:
+        - example_environment_variable_file
+    volumes:
+        - '../volumes/oak/logs/:/app/logs'
+    networks:
+        - oak_network
+    deploy:
+      mode: replicated
+      replicas: 20 # this will create 20 trees in the oak forest
+    restart_policy:
+        condition: on-failure
+        max-attempts: 3 # this will try to restart the container 3 times before giving up
+
+pine:
+    image: pine:latest
+    container_name: pine
+    env_file:
+        - example_environment_variable_file
+    environment:
+        - AGE=3 # this value will overwrite the value in the "example_environment_variable_file" file
+    volumes:
+        - '../volumes/pine/logs/:/app/logs'
+    networks:
+        - pine_network
+    deploy:
+        mode: replicated
+        replicas: 5 # this will create 5 trees in the pine forest
+
+maple:
+    image: maple:latest
+    container_name: maple
+    environment:
+        - AGE=5 # this value substitutes the whole need for the "example_environment_variable_file" file
+    volumes:
+        - '../volumes/maple/logs/:/app/logs'
+    networks:
+        - maple_network
+    deploy:
+        mode: replicated
+        replicas: 3 # this will create 3 trees in the maple forest
+
+
+# the gardener can talk to all the other services but the services can't talk to each other because they are in different networks
+gardener:
+    image: nginx:latest
+    container_name: gardener
+    volumes:
+        - '../volumes/gardener/logs/:/app/logs'
+    networks:
+        - oak_network
+        - pine_network
+        - maple_network
+    ports:
+        - 82:80 # the gardener can be accessed on port 82 even though the application inside it runs on port 80

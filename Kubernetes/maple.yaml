@@ -1,0 +1,35 @@
+# this is the Kubernetes deployment file for the maple service.
+
+kind: ReplicationController
+apiVersion: apps/v1
+metadata:
+  name: maple
+  namespace: maple-ns
+  labels:
+    app: maple-label
+spec:
+  replicas: 20
+  selector:
+    matchLabels:
+    app: maple
+  template:
+    metadata:
+    labels:
+      app: maple
+      spec:
+        type: ExternalName
+        externalName: maple.maple-ns.svc.cluster.local
+    containers:
+      - name: maple
+        image: maple:latest
+        env:
+          - name: AGE
+            value: "3"
+        volumeMounts:
+          - mountPath: /app/logs
+            name: maple-logs
+    volumes:
+      - name: maple-logs
+        hostPath:
+          path: /volumes/maple/logs/
+          type: Directory

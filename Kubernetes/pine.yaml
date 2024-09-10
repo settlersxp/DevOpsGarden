@@ -1,0 +1,35 @@
+# this is the Kubernetes deployment file for the pine service.
+
+kind: ReplicationController
+apiVersion: apps/v1
+metadata:
+  name: pine
+  namespace: pine-ns
+  labels:
+    app: pine-label
+spec:
+  replicas: 20
+  selector:
+    matchLabels:
+    app: pine
+  template:
+    metadata:
+    labels:
+      app: pine
+    spec:
+      type: ExternalName
+      externalName: pine.pine-ns.svc.cluster.local
+    containers:
+      - name: pine
+        image: pine:latest
+        env:
+          - name: AGE
+            value: "5"
+        volumeMounts:
+          - mountPath: /app/logs
+            name: pine-logs
+    volumes:
+      - name: pine-logs
+        hostPath:
+          path: /volumes/pine/logs/
+          type: Directory
